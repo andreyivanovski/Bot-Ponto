@@ -1,0 +1,7 @@
+services:
+  bot-ponto:
+    build: .
+    container_name: bot-ponto
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo

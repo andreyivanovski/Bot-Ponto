@@ -1,0 +1,15 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## Secrets
+.env
+appsettings.Development.json
+src/BotPonto/appsettings.json
+
+## OS
+Thumbs.db
+.DS_Store
