@@ -86,6 +86,16 @@ public class ClockWindowService
         return delay < TimeSpan.Zero ? TimeSpan.Zero : delay;
     }
 
+    public bool IsWithinWindow(ClockWindowInfo window)
+    {
+        var now = GetLocalNow();
+        return now >= window.WindowStart && now < window.WindowEnd;
+    }
+
+    public DateTime GetLocalNowPublic() => GetLocalNow();
+
+    public string GetTimeZoneId() => _timeZone.Id;
+
     private DateTime GetLocalNow()
     {
         return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZone);

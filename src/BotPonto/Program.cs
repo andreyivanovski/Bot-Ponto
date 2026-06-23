@@ -3,6 +3,10 @@ using BotPonto.Options;
 using BotPonto.Services;
 using BotPonto.Workers;
 
+var onceMode = args.Contains("--once");
+var directionArg = args.FirstOrDefault(a => a.StartsWith("--direction=", StringComparison.OrdinalIgnoreCase))
+    ?.Split('=', 2)[1];
+
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.Configure<TotvsOptions>(builder.Configuration.GetSection(TotvsOptions.SectionName));
@@ -10,6 +14,7 @@ builder.Services.Configure<ClockOptions>(builder.Configuration.GetSection(ClockO
 builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.SectionName));
 
 builder.Services.AddSingleton<ClockWindowService>();
+builder.Services.AddSingleton<ClockRunner>();
 
 var telegramOptions = builder.Configuration.GetSection(TelegramOptions.SectionName).Get<TelegramOptions>() ?? new TelegramOptions();
 if (telegramOptions.Enabled && !string.IsNullOrWhiteSpace(telegramOptions.BotToken))
@@ -36,10 +41,27 @@ builder.Services.AddHttpClient<ITotvsTimesheetService, TotvsTimesheetService>((s
     ConfigureTotvsHttpClient(client, options);
 });
 
+if (onceMode)
+{
+    if (string.IsNullOrWhiteSpace(directionArg) ||
+        !directionArg.Equals("entry", StringComparison.OrdinalIgnoreCase) &&
+        !directionArg.Equals("exit", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.Error.WriteLine("Uso: dotnet run -- --once --direction=entry|exit");
+        return 1;
+    }
+
+    var host = builder.Build();
+    var runner = host.Services.GetRequiredService<ClockRunner>();
+    await runner.RunOnceAsync(directionArg.ToLowerInvariant());
+    return 0;
+}
+
 builder.Services.AddHostedService<ClockWorker>();
 
-var host = builder.Build();
-host.Run();
+var workerHost = builder.Build();
+await workerHost.RunAsync();
+return 0;
 
 static void ConfigureTotvsHttpClient(HttpClient client, TotvsOptions options)
 {
