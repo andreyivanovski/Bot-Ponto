@@ -23,10 +23,15 @@ if (telegramOptions.Enabled && !string.IsNullOrWhiteSpace(telegramOptions.BotTok
     {
         client.BaseAddress = new Uri($"https://api.telegram.org/bot{telegramOptions.BotToken}/");
     });
+    builder.Services.AddHttpClient<ITelegramNotifier, TelegramNotifierService>((_, client) =>
+    {
+        client.BaseAddress = new Uri($"https://api.telegram.org/bot{telegramOptions.BotToken}/");
+    });
 }
 else
 {
     builder.Services.AddSingleton<IClockApprovalService, AutoApproveClockService>();
+    builder.Services.AddSingleton<ITelegramNotifier, NullTelegramNotifier>();
 }
 
 builder.Services.AddHttpClient<ITotvsAuthService, TotvsAuthService>((sp, client) =>
