@@ -73,8 +73,12 @@ static void ConfigureTotvsHttpClient(HttpClient client, TotvsOptions options)
     client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
     client.DefaultRequestHeaders.Add("Accept", "application/json, text/plain, */*");
     client.DefaultRequestHeaders.Add("Accept-Language", "pt-BR");
-    client.DefaultRequestHeaders.Add("Origin", "https://senffnet148707.protheus.cloudtotvs.com.br:4020");
-    client.DefaultRequestHeaders.Add("Referer", "https://senffnet148707.protheus.cloudtotvs.com.br:4020/");
+
+    var redirectUri = new Uri(options.RedirectUrl);
+    var origin = $"{redirectUri.Scheme}://{redirectUri.Authority}";
+    client.DefaultRequestHeaders.Add("Origin", origin);
+    client.DefaultRequestHeaders.Add("Referer", $"{origin}/");
+
     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
     client.DefaultRequestHeaders.Add("x-totvs-app", "0200");
 }
